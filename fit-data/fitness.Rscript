@@ -1,0 +1,24 @@
+require(drc)
+marks = c(5000, 403.4,148.4,54.6,20.1,7.4,2.7,1.0)
+
+build.rel.ic50 = function(iMatrix) {
+	rownames(iMatrix)=iMatrix[,1]
+	wts = iMatrix[,dim(iMatrix)[2]]
+	G = iMatrix[,2:(dim(iMatrix)[2]-1)]
+	G = cbind(0, G)
+	
+	purity = G[,dim(G)[2]]
+	G = G[,1:(dim(G)[2]-1)]
+
+	ic50 = c()
+	for (i in 1:dim(G)[1]) {
+		ic50 = c(ic50, drm(G[i,1:8]~marks, fct=LL.4())$coefficients[4])
+	}
+
+	ic50.cor = ic50 / purity
+	ic50.wt = median(ic50.cor[wts==1])
+	ic50.rel = ic50.wt / ic50.cor 
+
+	ic50.rel[purity < 70] = -Inf
+	ic50.rel
+}
